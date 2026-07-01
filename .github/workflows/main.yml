@@ -26,7 +26,16 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3) Build and Push the Docker image
+      # 3) Convert repository names to lowercase
+      - name: Downcase repository name and owner
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+          echo "REPO_LC=${REPO,,}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+
+      # 4) Build and Push the Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -35,5 +44,5 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ toLower(github.repository_owner) }}/${{ github.event.repository.name }}:latest
+            ghcr.io/${{ env.OWNER_LC }}/${{ env.REPO_LC }}:latest
 
